@@ -4,10 +4,45 @@ from database import db
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 import os
+import uuid
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+
+@bp.route('/guest', methods=['POST'])
+def guest_login():
+    """Handle guest login without authentication"""
+    try:
+        # Create a guest user with random name
+        guest_id = str(uuid.uuid4())[:8]
+        guest_name = f"Guest_{guest_id}"
+        guest_email = f"guest_{guest_id}@learnhub.local"
+        
+        # Check if guest user already exists (unlikely but handle it)
+        user = User.query.filter_by(email=guest_email).first()
+        
+        if not user:
+            user = User(
+                name=guest_name,
+                email=guest_email,
+                preferred_language='en',
+                selected_skills=[],
+                skill_level='beginner',
+                stream='general'
+            )
+            db.session.add(user)
+            db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'user': user.to_dict(),
+            'message': 'Guest login successful'
+        })
+        
+    except Exception as e:
+        print(f"Guest login error: {str(e)}")
+        return jsonify({'success': False, 'error': 'Guest login failed'}), 500
 
 @bp.route('/google', methods=['POST'])
 def google_login():
