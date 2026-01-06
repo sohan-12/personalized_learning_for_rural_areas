@@ -11,6 +11,7 @@ const GOOGLE_CLIENT_ID =
 export default function Login() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -31,6 +32,23 @@ export default function Login() {
   const handleGoogleError = () => {
     console.log("Login failed");
     setError("Google login failed. Please try again.");
+  };
+
+  const handleGuestLogin = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/auth/guest", {});
+
+      if (response.data.success) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        navigate("/skills");
+      }
+    } catch (error) {
+      console.error("Guest login failed:", error);
+      setError("Guest login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,6 +90,25 @@ export default function Login() {
                 size="large"
               />
             </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500 font-semibold">
+                  OR
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleGuestLogin}
+              disabled={loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50"
+            >
+              {loading ? "Logging in..." : "Continue as Guest"}
+            </button>
           </div>
 
           <div className="mt-8 pt-6 border-t-2 border-purple-100">
