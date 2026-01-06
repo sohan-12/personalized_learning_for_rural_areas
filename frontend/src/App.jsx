@@ -17,8 +17,7 @@ import Learn from "./pages/Learn";
 import CourseReview from "./pages/CourseReview";
 
 // Configure axios
-axios.defaults.baseURL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+axios.defaults.baseURL = "http://localhost:5000";
 
 function ProtectedRoute({ children }) {
   const user = JSON.parse(localStorage.getItem("user") || "null");
